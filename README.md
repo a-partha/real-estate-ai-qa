@@ -1,4 +1,4 @@
-# NYC ACRIS Property Deeds Information
+# NYC ACRIS Property Deeds Q&A with Integrated LLM
 Live site: http://34.48.240.113:8000/
 
 Overview
