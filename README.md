@@ -133,7 +133,15 @@ This ensures all code, dependencies, and configuration are ready before deployme
     # Install Docker Engine and Compose
     sudo apt-get update
     sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    ```
 
+    Your frontend code needs to be aware of the public server address so that the React application knows which URL to use for API calls depending on whether it's in development or production.
+    
+    ```
+    # In your frontend folder (on your local machine), create two new files named .env.development and .env.production
+    Then, define Your API URLs:
+    - Inside .env.development, add this for local testing: VITE_API_BASE_URL=http://localhost:8000
+    - Inside .env.production, add: VITE_API_BASE_URL=http://[your server's public IP address]:8000    
     ```
 
 2.  **Transfer Project Files:** From your local PowerShell terminal, copy your entire prepared main project folder to the VM.
@@ -150,7 +158,6 @@ This ensures all code, dependencies, and configuration are ready before deployme
     ```
     cd [YOUR_MAIN_PROJECT_FOLDER_NAME]
     nano .env
-
     ```
 
     -   Paste the following content into the editor, adding your Google API key.
@@ -160,7 +167,6 @@ This ensures all code, dependencies, and configuration are ready before deployme
         AIRFLOW_USER=your_actual_username
         AIRFLOW_PW=your_actual_password
         AIRFLOW_API_BASE_URL=http://airflow-webserver:8080/api/v1
-
         ```
 
     -   Save the file by pressing `Ctrl+O`, `Enter`, and `Ctrl+X`.
@@ -171,7 +177,6 @@ This ensures all code, dependencies, and configuration are ready before deployme
 
     ```
     docker compose up -d --build
-
     ```
 
     -   The `--build` flag ensures Docker creates a fresh image with your latest frontend files. The `-d` flag runs it in the background.
