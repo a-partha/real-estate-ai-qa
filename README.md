@@ -1,6 +1,5 @@
 # NYC ACRIS Property Deeds Q&A with Integrated LLM
-Live site: [http://34.48.240.113:8000/
-](http://34.86.83.238:8000/)
+Live site: [http://34.86.83.238:8000/](http://34.86.83.238:8000/)
 
 Overview
 ----------------
