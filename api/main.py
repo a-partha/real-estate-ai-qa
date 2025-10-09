@@ -1,3 +1,4 @@
+#main.py
 import os
 import time
 import requests
@@ -9,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 import pathlib
 
-DAG_ID = "legal_property_pipeline"
+DAG_ID = "tf_idf_property_pipeline"
 
 # ── Resolve Airflow base URL ────────────────────────────────────────────────────
 

@@ -109,7 +109,7 @@ export default function App() {
     alignItems: 'center',
     gap: '10px',
     justifyContent: 'center',
-    minHeight: '44px', // Better touch target
+    minHeight: '44px', 
   };
 
   const subtleText = { 
@@ -170,7 +170,7 @@ export default function App() {
       const body = { prompt };
       if (topk && !Number.isNaN(Number(topk))) body.top_k = Number(topk);
 
-      const res = await fetch('/ask', {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/ask`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -194,7 +194,7 @@ export default function App() {
 
   return (
     <div style={pageStyle}>
-      {/* hard override defaults from index.css that were causing layout issues */}
+      {}
       <style>{`
         html, body, #root { height: 100%; width: 100%; }
         body { display: block !important; place-items: unset !important; overflow-x: hidden; }
@@ -207,6 +207,8 @@ export default function App() {
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
         }
+        .repo-link { color: #93c5fd; text-decoration: none; }
+        .repo-link:hover { color: #60a5fa; }
         
         /* Responsive breakpoints */
         @media (max-width: 768px) {
@@ -233,14 +235,23 @@ export default function App() {
 
       <div style={cardStyle} className="card-container">
         <h1 style={titleStyle}>NYC ACRIS Property Deeds Information</h1>
+        <div style={{ height: '10px' }} />
         <p style={subtitleStyle}>
           <i>Served by DuckDB, powered by Gemini 1.5 Flash, handled by Apache Airflow, and deployed on Google Cloud Platform.
           </i>
         </p>
+        <p style={subtitleStyle}>
+          <a href="https://github.com/a-partha/real-estate-ai-qa" target="_blank" rel="noopener noreferrer" className="repo-link">GitHub repository</a>
+        </p>
+
 
         <textarea
           style={textareaStyle}
-          placeholder="What would you like to know?"
+          placeholder="What would you like to know?
+
+Example questions:
+- What is this dataset about?
+- Which area has the most properties?"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
         />
@@ -270,6 +281,13 @@ export default function App() {
             'Ask'
           )}
         </button>
+
+        <div style={{ height: '10px' }} />
+        <p style={labelStyle}>
+        <span style={{ ...subtitleStyle, fontStyle: 'normal', display: 'block', textAlign: 'left', marginLeft: -18 }}>
+          Note: Please allow about 25 seconds for an answer to be generated, as it's a large dataset.
+        </span>
+        </p>
 
         {answer && (
           <div style={answerSectionStyle}>

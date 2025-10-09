@@ -1,5 +1,4 @@
-
-# legal_property_pipeline.py
+# tf_idf_pipeline.py
 import os
 import re
 import json
