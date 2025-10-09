@@ -237,7 +237,7 @@ export default function App() {
         <h1 style={titleStyle}>NYC ACRIS Property Deeds Information</h1>
         <div style={{ height: '10px' }} />
         <p style={subtitleStyle}>
-          <i>Served by DuckDB, powered by Gemini 1.5 Flash, handled by Apache Airflow, and deployed on Google Cloud Platform.
+          <i>Served by DuckDB, powered by TF-IDF + Gemini 2.5 Flash Lite, handled by Apache Airflow, and deployed on Google Cloud Platform.
           </i>
         </p>
         <p style={subtitleStyle}>

@@ -1,4 +1,4 @@
-# tf_idf_pipeline.py
+# tf_idf_property_pipeline.py
 import os
 import re
 import json
@@ -9,15 +9,17 @@ import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.neighbors import NearestNeighbors
 import google.generativeai as genai
+from docx import Document
 
 from airflow.decorators import dag, task
 
 
 @dag(
+    dag_id="tf_idf_property_pipeline",
     start_date=datetime(2025, 1, 1),
     schedule=None,
     catchup=False,
-    tags=["vector_search"],
+    tags=["vector_search"]
 )
 def legal_property_pipeline():
     """
@@ -42,24 +44,150 @@ def legal_property_pipeline():
         # sample for speed
         df = df.sample(n=1000, random_state=42).reset_index(drop=True)
 
+        # Load metadata from Excel and Word files
+        try:
+            # Load specific sheets from Excel
+            data_dict_path = "/opt/airflow/data/ACRIS_-_Real_Property_Legals_Data_Dictionary.xlsx"
+            excel_sheets = pd.read_excel(data_dict_path, sheet_name=['Dataset Info', 'Column Info'])
+            print(f"Loaded Excel sheets: {list(excel_sheets.keys())}")
+            
+            dataset_info = excel_sheets['Dataset Info']
+            column_info = excel_sheets['Column Info']
+            print(f"Dataset Info sheet: {dataset_info.shape}")
+            print(f"Column Info sheet: {column_info.shape}")
+        except Exception as e:
+            print(f"Could not load data dictionary: {e}")
+            dataset_info = pd.DataFrame()
+            column_info = pd.DataFrame()
+
+        try:
+            # Load documentation from both Word files
+            doc_paths = [
+                "/opt/airflow/data/ACRIS_Public_OpenData_Guide.docx",
+                "/opt/airflow/data/NYC_OpenData_ACRIS_Datasets.docx"
+            ]
+            doc_texts = []
+            for doc_path in doc_paths:
+                try:
+                    doc = Document(doc_path)
+                    raw_text = "\n".join([para.text for para in doc.paragraphs if para.text.strip()])
+                    
+                    # Clean problematic Unicode characters
+                    cleaned_text = raw_text
+                    cleaned_text = cleaned_text.replace('\xa0', ' ')  # Non-breaking space
+                    cleaned_text = cleaned_text.replace('\u201c', '"')  # Left double quotation mark
+                    cleaned_text = cleaned_text.replace('\u201d', '"')  # Right double quotation mark
+                    cleaned_text = cleaned_text.replace('\u2018', "'")  # Left single quotation mark
+                    cleaned_text = cleaned_text.replace('\u2019', "'")  # Right single quotation mark
+                    
+                    doc_texts.append(cleaned_text)
+                    print(f"Loaded {doc_path.split('/')[-1]} with {len(cleaned_text)} characters (cleaned from {len(raw_text)})")
+                except Exception as e:
+                    print(f"Could not load {doc_path}: {e}")
+            doc_text = "\n\n".join(doc_texts) if doc_texts else ""
+            print(f"Combined documentation has {len(doc_text)} total characters")
+        except Exception as e:
+            print(f"Could not load documentation: {e}")
+            doc_text = ""
+
         borough_map = {
             "1": "Manhattan", "2": "Bronx", "3": "Brooklyn",
             "4": "Queens", "5": "Staten Island"
         }
 
+        # Create lookup dictionaries from actual Excel data
+        record_type_descriptions = {}
+        property_type_descriptions = {}
+        dataset_context = ""
+        
+        # Parse Dataset Info sheet for general context
+        if not dataset_info.empty:
+            for _, row in dataset_info.iterrows():
+                if pd.notna(row.iloc[0]) and pd.notna(row.iloc[1]):
+                    field_name = str(row.iloc[0]).strip()
+                    field_value = str(row.iloc[1]).strip()
+                    
+                    if field_name.lower() == 'dataset description':
+                        dataset_context = field_value
+                    elif field_name.lower() == 'detailed description':
+                        if field_value and field_value != 'nan':
+                            dataset_context += f" {field_value}"
+        
+        # Parse Column Info sheet for field descriptions
+        if not column_info.empty:
+            for i, row in column_info.iterrows():
+                if pd.notna(row.iloc[0]):
+                    field_name = str(row.iloc[0]).strip()
+                    field_desc = str(row.iloc[1]).strip() if pd.notna(row.iloc[1]) else ""
+                    
+                    # Extract Record Type description
+                    if field_name.lower() == 'record type' and field_desc:
+                        # Parse description like "'L' for lot record" (handle Unicode quotes)
+                        if "for" in field_desc:
+                            parts = field_desc.split("for")
+                            if len(parts) == 2:
+                                code_part = parts[0].strip()
+                                desc_part = parts[1].strip()
+                                # Extract the letter from the code part
+                                for char in code_part:
+                                    if char.isalpha():
+                                        code = char
+                                        record_type_descriptions[code] = desc_part
+                                        break
+                    
+                    # Extract Property Type description
+                    elif field_name.lower() == 'property type' and field_desc:
+                        # Property type description is in the description field
+                        property_type_descriptions['info'] = field_desc
+                    
+                    # Extract Borough descriptions
+                    elif field_name.lower() == 'borough' and pd.notna(row.iloc[3]):
+                        borough_notes = str(row.iloc[3])
+                        if "=" in borough_notes:
+                            # Parse "1 = Manhattan\n2 = Bronx\n3 = Brooklyn\n4 = Queens"
+                            lines = borough_notes.split('\n')
+                            for line in lines:
+                                if '=' in line:
+                                    parts = line.split('=')
+                                    if len(parts) == 2:
+                                        code = parts[0].strip()
+                                        desc = parts[1].strip()
+                                        if code.isdigit():
+                                            borough_map[code] = desc
+        
+        print(f"Dataset context: {dataset_context[:100]}...")
+        print(f"Found {len(record_type_descriptions)} record type descriptions: {record_type_descriptions}")
+        print(f"Found {len(property_type_descriptions)} property type descriptions: {property_type_descriptions}")
+
         def row_to_text(row):
+            # Enhanced text with descriptions from actual Excel data
+            record_type = row['record_type']
+            record_desc = record_type_descriptions.get(record_type, "")
+            record_text = f"Record type {record_type}" + (f" ({record_desc})" if record_desc else "")
+            
+            property_type = row.get('property_type', '')
+            prop_desc = property_type_descriptions.get(property_type, "")
+            prop_text = f"Property type {property_type}" + (f" ({prop_desc})" if prop_desc else "")
+            
             parts = [
                 f"Document ID {row['document_id']}",
-                f"Record type {row['record_type']}",
+                record_text,
                 f"Borough {borough_map.get(str(row['borough']), row['borough'])}",
                 f"Block {row['block']}",
                 f"Lot {row['lot']}",
-                f"Property type {row.get('property_type', '')}",
+                prop_text,
                 f"Street number {row.get('street_number', '')}",
                 f"Street name {row.get('street_name', '')}",
                 f"Unit {row.get('unit', '')}",
                 f"Good through date {row.get('good_through_date', '')}",
             ]
+            
+            # Add additional context from Excel dataset info and Word documentation
+            if dataset_context:
+                parts.append(f"Dataset: {dataset_context[:100]}...")
+            elif doc_text and len(doc_text) > 100:
+                parts.append(f"Context: ACRIS property records system")
+            
             return ", ".join(p for p in parts if str(p).strip())
 
         df["text"] = df.apply(row_to_text, axis=1)
@@ -135,7 +263,7 @@ def legal_property_pipeline():
         )
 
         try:
-            router_model = genai.GenerativeModel("gemini-1.5-flash")
+            router_model = genai.GenerativeModel("gemini-2.5-flash")
             r = router_model.generate_content(routing_prompt)
             raw = getattr(r, "text", str(r)) or ""
             # strip code fences if any
@@ -213,7 +341,7 @@ def legal_property_pipeline():
         context_docs = "\n".join(df.iloc[idxs]["text"].tolist())
 
         # generate final answer
-        qa_model = genai.GenerativeModel("gemini-1.5-flash")
+        qa_model = genai.GenerativeModel("gemini-2.5-flash")
         message = (
             "You are given the following context from a property deeds dataset:\n\n"
             f"{context_docs}\n\n"
@@ -236,4 +364,3 @@ def legal_property_pipeline():
 
 
 legal_property_pipeline()
-

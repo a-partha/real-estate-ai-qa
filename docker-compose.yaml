@@ -147,8 +147,8 @@ services:
       acris-net:
         aliases:
           - api-service
-    extra_hosts:
-      - "airflow-webserver:10.150.0.2"
+    # extra_hosts:
+    #   - "airflow-webserver:172.18.0.5"
 
 volumes:
   postgres-data:
