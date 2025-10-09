@@ -157,4 +157,4 @@ OTHER APPLICATIONS
 NOTE:
 -----
 
-You must supply your own Gemini, Airflow, and DB credentials. All secrets should be managed in your personal `.env` file.
+You must supply your own Gemini, Airflow, and DB credentials. All secrets should be managed in your personal `.env` file. The current app takes about 25 to 40 seconds to provide an answer depending on the query type.
