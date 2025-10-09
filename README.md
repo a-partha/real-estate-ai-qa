@@ -28,7 +28,7 @@ TECH STACK
 
 -   Git
 
--   Google Gemini (LLM, requires API Key)
+-   Google Gemini 2.5 Flash Lite (LLM, requires API Key)
 
 -   React (web frontend)
 
