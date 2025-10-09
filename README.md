@@ -4,7 +4,7 @@ NYC Property Deeds Q&A with Integrated AI
 OVERVIEW
 --------
 
-A full-stack data pipeline for natural language question-answering on NYC ACRIS property records using TF-IDF vector search, LLM (Gemini) integration, Apache Airflow orchestration, and a React web frontend hosted on Google Cloud Platform. Designed for easier semantic retrieval on any large dataset.
+A full-stack data pipeline for natural language question-answering on 500k+ New York City ACRIS property records using TF-IDF vector search, LLM (Gemini) integration, Apache Airflow orchestration, and a React web frontend hosted on Google Cloud Platform. Designed for easier semantic retrieval on any large dataset.
 
 Live demo link: [http://34.86.83.238:8000/](http://34.86.83.238:8000/)
 
