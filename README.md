@@ -6,6 +6,8 @@ OVERVIEW
 
 A full-stack pipeline for natural language question-answering on NYC ACRIS property records using TF-IDF vector search, LLM (Gemini) integration, Apache Airflow orchestration, and a React web frontend hosted on Google Cloud Platform. Designed for easier semantic retrieval on any large dataset.
 
+Live demo link: [http://34.86.83.238:8000/](http://34.86.83.238:8000/)
+
 CORE PIPELINE WORKFLOW
 ----------------------
 
@@ -45,7 +47,7 @@ KEY COMPONENTS
 
 -   /dags : Airflow Directed Acyclic Graphs (DAGs) for pipeline task automation
 
--   /data : Property records and metadata downloaded from [NYC Open Data Portal]([https://link-url-here.org](https://data.cityofnewyork.us/City-Government/ACRIS-Real-Property-Legals/8h5j-fqxa/about_data))
+-   /data : Property records and metadata downloaded from [NYC Open Data Portal](https://data.cityofnewyork.us/City-Government/ACRIS-Real-Property-Legals/8h5j-fqxa/about_data))
 
 -   /web : React Single-Page Application (SPA) frontend
 
