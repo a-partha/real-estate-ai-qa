@@ -263,7 +263,7 @@ def legal_property_pipeline():
         )
 
         try:
-            router_model = genai.GenerativeModel("gemini-2.5-flash")
+            router_model = genai.GenerativeModel("gemini-2.5-flash-lite")
             r = router_model.generate_content(routing_prompt)
             raw = getattr(r, "text", str(r)) or ""
             # strip code fences if any
@@ -341,7 +341,7 @@ def legal_property_pipeline():
         context_docs = "\n".join(df.iloc[idxs]["text"].tolist())
 
         # generate final answer
-        qa_model = genai.GenerativeModel("gemini-2.5-flash")
+        qa_model = genai.GenerativeModel("gemini-2.5-flash-lite")
         message = (
             "You are given the following context from a property deeds dataset:\n\n"
             f"{context_docs}\n\n"
