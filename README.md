@@ -11,7 +11,7 @@ Live demo link: [http://34.86.83.238:8000/](http://34.86.83.238:8000/)
 CORE PIPELINE WORKFLOW
 ----------------------
 
--   Data ingest (CSV/DuckDB) → Vectorization (TF-IDF) → LLM Query with context → Response via React frontend.
+-   Data ingest (CSV/XLSX/DOCX/DuckDB) → Vectorization (TF-IDF) → LLM Query with context → Response via React frontend.
 
 -   All backend API and pipeline steps orchestrated by Airflow.
 
