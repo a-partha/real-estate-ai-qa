@@ -135,7 +135,7 @@ KEY SKILLS & CONCEPTS DEMONSTRATED
 
 -   API development (FastAPI)
 
--   Containerization (Docker Compose)
+-   Containerization (Docker)
 
 -   Cloud service setup (GCP VM)
 
