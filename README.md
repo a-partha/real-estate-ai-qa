@@ -26,8 +26,6 @@ TECH STACK
 
 -   Docker Compose
 
--   Git
-
 -   Google Gemini 2.5 Flash Lite (LLM, requires API Key)
 
 -   React (web frontend)
