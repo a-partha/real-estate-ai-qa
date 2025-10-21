@@ -1,7 +1,7 @@
 NYC Property Deeds Q&A with Integrated AI
 ================================================
 
-## Abstract
+## Description
 
 Deployed a scalable  web app with LLM integration on GCP, containerizing a full-stack solution with Docker via REST API to deliver TF-IDF-based vector search over 500k+ property records with BigQuery-powered access control.
 
