@@ -3,13 +3,13 @@ NYC Property Deeds Q&A with Integrated AI
 
 ## Description
 
-Deployed a scalable  web app with LLM integration on GCP, containerizing a full-stack solution with Docker via REST API to deliver TF-IDF-based vector search over 500k+ property records with BigQuery-powered access control.
+Deployed a scalable  web app with LLM integration on GCP, containerizing a full-stack solution with Docker via REST API to deliver Pinecone-based vector search (lexical and semantic) over 500k+ property records with BigQuery-powered access control.
 
 **Link:** [http://34.86.83.238:8000/](http://34.86.83.238:8000/)
 
 ## System Overview
 
-React UI (built with Node/Vite) sends a question to a Python FastAPI service, which triggers Airflow to run data/AI steps; Airflow produces a natural-language answer (using DuckDB/dbt + TF‑IDF + Gemini), FastAPI returns it, React shows it. Everything runs in Docker containers on a GCP VM with BigQuery access control enforcing 3 queries per day per IP and top ranked record matches ≤ 100 limits.
+React UI (built with Node/Vite) sends a question to a Python FastAPI service, which triggers Airflow to run data/AI steps; Airflow produces a natural-language answer (using DuckDB/dbt + Pinecone + Gemini), FastAPI returns it, React shows it. Everything runs in Docker containers on a GCP VM with BigQuery access control enforcing 3 queries per day per IP and top ranked record matches ≤ 100 limits.
 
 ## Process Overview
 
@@ -20,7 +20,7 @@ React UI (built with Node/Vite) sends a question to a Python FastAPI service, wh
 5. If allowed, FastAPI calls the Airflow REST API to trigger a DAG run.
 6. Airflow runs tasks in Docker containers:
    - Build dbt models
-   - Create and search vectors
+   - Upsert and search vectors using the VectorDB's integrated embedding models
    - Call the Gemini API to route the question and generate an answer
 7. FastAPI polls the Airflow REST API to get the result.
 8. FastAPI logs the successful query to BigQuery for access control tracking.
@@ -38,6 +38,7 @@ React UI (built with Node/Vite) sends a question to a Python FastAPI service, wh
 - **PostgresSQL**: stores Airflow metadata.
 - **Redis**: handles task queuing used by Airflow's Celery executor.
 - **DuckDB + dbt**: quick lightweight db + data transformation.
+- **Pinecone VectorDB**: serverless vector database with integrated embedding to upsert and search text
 - **BigQuery**: cloud data warehouse for access control and query logging.
 - **Gemini 2.5 Flash Lite**: LLM that routes queries + creates the final answer.
 - **GCP VM**: server host (machine/IP) where containers run.
