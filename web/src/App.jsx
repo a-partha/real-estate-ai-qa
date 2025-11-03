@@ -248,10 +248,11 @@ export default function App() {
         <textarea
           style={textareaStyle}
           placeholder="What would you like to know?
+          
 
-Example questions:
-- What is this dataset about?
-- Which area has the most properties?"
+          Example questions:
+          - What is this dataset about?
+          - Which area has the most properties?"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
         />
@@ -285,7 +286,7 @@ Example questions:
         <div style={{ height: '10px' }} />
         <p style={labelStyle}>
         <span style={{ ...subtitleStyle, fontStyle: 'normal', display: 'block', textAlign: 'left', marginLeft: -18 }}>
-          Note: Please allow about 25 seconds for an answer to be generated, as it's a large dataset.
+          Note: Please allow about 25 to 40 seconds for an answer to be generated depending on query complexity.
         </span>
         </p>
 

@@ -2,17 +2,20 @@
 import os
 import time
 import requests
+import json
 from urllib.parse import urljoin
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from typing import Optional
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 import pathlib
+from google.cloud import bigquery
+from datetime import datetime, date
 
 DAG_ID = "pinecone_property_pipeline"
 
-# ── Resolve Airflow base URL ────────────────────────────────────────────────────
+# Resolving Airflow base URL
 
 def normalize_base(u: str) -> str:
     return u.rstrip("/")
@@ -57,9 +60,18 @@ try:
 except ValueError:
     raise RuntimeError("AIRFLOW_DAG_MAX_WAIT_SEC must be an integer")
 
-# ── FastAPI app ────────────────────────────────────────────────────────────────
+# Creating FastAPI app
 
 app = FastAPI(title="NYC ACRIS QA API")
+
+# Creating BigQuery client
+client = bigquery.Client()
+credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+with open(credentials_path, "r") as f:
+    service_account_info = json.load(f)
+    PROJECT_ID = service_account_info["project_id"]
+DATASET_ID = "acris_demo"
+TABLE_ID = "user_query_logs"
 
 class AskRequest(BaseModel):
     prompt: str
@@ -72,7 +84,7 @@ async def read_index():
     index_path = pathlib.Path(os.path.join(os.getcwd(), "web/dist/index.html"))
     return index_path.read_text()
 
-# ── Airflow helpers ────────────────────────────────────────────────────────────
+# Creating Airflow helpers
 
 def airflow_request(method: str, path: str, **kwargs):
     url = urljoin(AIRFLOW_API_BASE_URL + "/", path.lstrip("/"))
@@ -83,9 +95,9 @@ def airflow_request(method: str, path: str, **kwargs):
         timeout=15,
         **kwargs,
     )
-    # For 4xx/5xx erros to map them to clear messages
+    # Mapping 4xx/5xx errors to clear messages
     resp.raise_for_status()
-    # Some Airflow endpoints return empty body
+    # Handling endpoints returning empty bodies
     return resp.json() if resp.content else {}
 
 def ensure_dag_available(dag_id: str):
@@ -100,22 +112,95 @@ def ensure_dag_available(dag_id: str):
             )
         raise
 
-# ── API: /ask ─────────────────────────────────────────────────────────────────
+# Managing BigQuery access control
+
+def get_client_ip(request: Request) -> str:
+    """Extract client IP address from request."""
+    # Parsing forwarded IP when present
+    forwarded_for = request.headers.get("X-Forwarded-For")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    
+    # Falling back to direct connection
+    return request.client.host
+
+def check_daily_query_limit(client_ip: str) -> bool:
+    """Check if client IP has exceeded 3 queries per day limit."""
+    try:
+        query = f"""
+        SELECT COUNT(*) as query_count
+        FROM `{PROJECT_ID}.{DATASET_ID}.{TABLE_ID}`
+        WHERE client_ip = @client_ip 
+        AND query_date = CURRENT_DATE()
+        """
+        
+        query_job = client.query(query, job_config=bigquery.QueryJobConfig(
+            query_parameters=[
+                bigquery.ScalarQueryParameter("client_ip", "STRING", client_ip)
+            ]
+        ))
+        
+        results = query_job.result()
+        for row in results:
+            return row.query_count < 3
+        
+        return True  # No previous queries today
+    except Exception as e:
+        print(f"Error checking query limit: {e}")
+        return True  # Allow on error for demo
+
+def log_query(client_ip: str, top_k: int):
+    """Log the query to BigQuery."""
+    try:
+        table_ref = client.dataset(DATASET_ID).table(TABLE_ID)
+        table = client.get_table(table_ref)
+        
+        rows_to_insert = [{
+            "client_ip": client_ip,
+            "query_date": date.today(),
+            "query_timestamp": datetime.now(),
+            "top_k": top_k
+        }]
+        
+        errors = client.insert_rows(table, rows_to_insert)
+        if errors:
+            print(f"Error inserting query log: {errors}")
+    except Exception as e:
+        print(f"Error logging query: {e}")
+
+# Exposing API: /ask
 
 @app.post("/ask")
-def ask(request: AskRequest):
+def ask(request: AskRequest, http_request: Request):
     prompt = request.prompt
     top_k = request.top_k
 
-    # Check DAG exists before triggering
+    # Getting client IP for access control
+    client_ip = get_client_ip(http_request)
+    
+    # Validating top_k limit (≤ 100)
+    if top_k is not None and top_k > 100:
+        raise HTTPException(
+            status_code=400,
+            detail="top_k cannot exceed 100. Please reduce your request."
+        )
+    
+    # Checking daily query limit (3 queries per day per IP)
+    if not check_daily_query_limit(client_ip):
+        raise HTTPException(
+            status_code=429,
+            detail="Daily query limit exceeded. You can make 3 queries per day. Please try again tomorrow."
+        )
+
+    # Ensuring DAG exists before triggering
     ensure_dag_available(DAG_ID)
 
-    # Build conf without nulls
+    # Building configuration without nulls
     conf = {"prompt": prompt}
     if top_k is not None:
         conf["top_k"] = top_k
 
-    # 1) Trigger the DAG
+    # Triggering DAG
     try:
         payload = airflow_request(
             "POST",
@@ -134,7 +219,7 @@ def ask(request: AskRequest):
     if not run_id:
         raise HTTPException(500, f"No dag_run_id returned: {payload}")
 
-    # 2) Poll until success or failure
+    # Polling until success or failure
     elapsed = 0
     interval = 5
     while elapsed < AIRFLOW_DAG_MAX_WAIT_SEC:
@@ -155,7 +240,7 @@ def ask(request: AskRequest):
             f"DAG run {run_id} did not complete within {AIRFLOW_DAG_MAX_WAIT_SEC}s",
         )
 
-    # 3) Fetch XComs
+    # Fetching XComs
     def get_xcom(key: str) -> Optional[str]:
         try:
             res = airflow_request(
@@ -171,6 +256,9 @@ def ask(request: AskRequest):
     context = get_xcom("context") or ""
     route = get_xcom("route")
     confidence = get_xcom("confidence")
+
+    # Logging successful query to BigQuery
+    log_query(client_ip, top_k or 50)
 
     return {
         "answer": answer,
