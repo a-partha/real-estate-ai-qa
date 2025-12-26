@@ -1,4 +1,4 @@
-NYC Property Deeds Q&A with Integrated AI
+[Temporarily paused] NYC Property Deeds Q&A with Integrated AI
 ================================================
 
 ## Description
