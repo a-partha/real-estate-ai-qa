@@ -1,4 +1,4 @@
-[Temporarily paused] NYC Property Deeds Q&A with Integrated AI
+<img width="1337" height="271" alt="image" src="https://github.com/user-attachments/assets/d47aa55f-d0b9-495b-a6b1-19f21ea855c6" />[Temporarily paused] NYC Property Deeds Q&A with Integrated AI
 ================================================
 
 ## Description
@@ -9,7 +9,7 @@ Deployed a scalable  web app with LLM integration on GCP, containerizing a full-
 
 ## System Overview
 
-React UI (built with Node/Vite) sends a question to a Python FastAPI service, which triggers Airflow to run data/AI steps; Airflow produces a natural-language answer (using DuckDB/dbt + Pinecone + Gemini), FastAPI returns it, React shows it. Everything runs in Docker containers on a GCP VM with BigQuery access control enforcing 3 queries per day per IP and top ranked record matches ≤ 100 limits.
+React UI (built with Node/Vite) sends a question to a Python FastAPI service, which triggers Airflow to run data/AI steps; Airflow produces a natural-language answer (using DuckDB/dbt + Pinecone + Gemini), FastAPI returns it, React shows it. Everything runs in Docker containers on a GCP Compute Engine (VM: e2-standard-2 with 2 vCPUs and 8 GB Memory, OS: Debian GNU/Linux 12) with BigQuery access control enforcing 3 queries per day per IP and top ranked record matches ≤ 100 limits.
 
 ## Process Overview
 
@@ -41,7 +41,7 @@ React UI (built with Node/Vite) sends a question to a Python FastAPI service, wh
 - **Pinecone VectorDB**: serverless vector database with integrated embedding to upsert and search text
 - **BigQuery**: cloud data warehouse for access control and query logging.
 - **Gemini 2.5 Flash Lite**: LLM that routes queries + creates the final answer.
-- **GCP VM**: server host (machine/IP) where containers run.
+- **GCP VM**: server host (machine/IP) where containers run. 
 
 ## DevOps/SRE Features
 
