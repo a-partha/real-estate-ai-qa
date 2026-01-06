@@ -2,12 +2,13 @@
 
 NYC Property Deeds Q&A with Integrated AI
 ================================================
+Get natural language answers to questions about actual [New York City property deeds](https://data.cityofnewyork.us/City-Government/ACRIS-Real-Property-Legals/8h5j-fqxa/about_data)!
+
+**Live Demo Link:** [http://34.83.125.145:8000/](http://34.83.125.145:8000/)
 
 ## Description
 
 Deployed a scalable  web app with LLM integration on GCP, containerizing a full-stack solution with Docker via REST API to deliver Pinecone-based vector search (lexical and semantic) over 500k+ property records with BigQuery-powered access control.
-
-**Live Demo Link:** [http://34.83.125.145:8000/](http://34.83.125.145:8000/)
 
 ## System Overview
 
