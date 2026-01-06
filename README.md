@@ -1,11 +1,13 @@
-<img width="1337" height="271" alt="image" src="https://github.com/user-attachments/assets/d47aa55f-d0b9-495b-a6b1-19f21ea855c6" />[Temporarily paused] NYC Property Deeds Q&A with Integrated AI
+<img width="1456" height="862" alt="image" src="https://github.com/user-attachments/assets/1d5fa70b-bf2c-4253-97be-25df46c8d9e8" />
+
+NYC Property Deeds Q&A with Integrated AI
 ================================================
 
 ## Description
 
 Deployed a scalable  web app with LLM integration on GCP, containerizing a full-stack solution with Docker via REST API to deliver Pinecone-based vector search (lexical and semantic) over 500k+ property records with BigQuery-powered access control.
 
-**Link:** [http://34.86.83.238:8000/](http://34.86.83.238:8000/)
+**Live Demo Link:** [http://34.83.125.145:8000/](http://34.83.125.145:8000/)
 
 ## System Overview
 
