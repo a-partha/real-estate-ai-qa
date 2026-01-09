@@ -4,7 +4,7 @@ NYC Property Deeds Q&A with Integrated AI
 ================================================
 Get natural language answers to questions about actual [New York City property deeds](https://data.cityofnewyork.us/City-Government/ACRIS-Real-Property-Legals/8h5j-fqxa/about_data)!
 
-**Live Demo Link:** [http://34.83.125.145:8000/](http://34.83.125.145:8000/)
+**Live Demo Link:** [http://34.83.125.145:8000/](http://34.118.192.16:8000/)
 
 ## Description
 
