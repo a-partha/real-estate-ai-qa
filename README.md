@@ -1,6 +1,6 @@
 <img width="1456" height="862" alt="image" src="https://github.com/user-attachments/assets/1d5fa70b-bf2c-4253-97be-25df46c8d9e8" />
 
-NYC Property Deeds Q&A with Integrated AI
+[Temporarily Down] NYC Property Deeds Q&A with Integrated AI
 ================================================
 Get natural language answers to questions about actual [New York City property deeds](https://data.cityofnewyork.us/City-Government/ACRIS-Real-Property-Legals/8h5j-fqxa/about_data)!
 
