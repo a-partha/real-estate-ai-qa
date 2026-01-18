@@ -9,11 +9,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 USER airflow
 
-RUN pip install --no-cache-dir \
+RUN pip uninstall -y pinecone-client || true && \
+    pip install --no-cache-dir \
     'dbt-core==1.7.4' \
     'dbt-duckdb==1.7.4' \
     'pandas==2.2.2' \
     'scikit-learn==1.4.1.post1' \
     'duckdb==0.10.2' \
     'google-generativeai==0.5.0' \
-    'joblib==1.3.2'
+    'joblib==1.3.2' \
+    'pinecone' \
+    'python-docx'

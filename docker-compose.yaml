@@ -25,13 +25,14 @@ services:
       - acris-net
 
   airflow-init:
-    build: ./airflow_image
+    build:
+      context: ./airflow_image
     env_file:
       - .env
     container_name: airflow_init
     environment:
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/airflow
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/airflow
       AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
     volumes:
       - ./dags:/opt/airflow/dags
@@ -57,12 +58,13 @@ services:
         condition: service_healthy
 
   airflow-webserver:
-    build: ./airflow_image
+    build:
+      context: ./airflow_image
     env_file:
       - .env
     environment:
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/airflow
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/airflow
       AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0    
 
     volumes:
@@ -88,12 +90,13 @@ services:
         condition: service_completed_successfully
 
   airflow-scheduler:
-    build: ./airflow_image
+    build:
+      context: ./airflow_image
     env_file:
       - .env
     environment:
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/airflow
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/airflow
       AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0
      
     volumes:
@@ -109,12 +112,13 @@ services:
         condition: service_completed_successfully
 
   airflow-worker:
-    build: ./airflow_image
+    build:
+      context: ./airflow_image
     env_file:
       - .env
     environment:
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/airflow
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/airflow
       AIRFLOW__CELERY__BROKER_URL: redis://redis:6379/0   
 
     volumes:
@@ -130,7 +134,9 @@ services:
         condition: service_completed_successfully
 
   api:
-    build: ./api
+    build:
+      context: ./api
+      dockerfile: Dockerfile_Pinecone
     env_file:
       - .env
     environment:
