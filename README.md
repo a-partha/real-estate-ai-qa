@@ -1,10 +1,10 @@
 <img width="1456" height="862" alt="image" src="https://github.com/user-attachments/assets/1d5fa70b-bf2c-4253-97be-25df46c8d9e8" />
 
-[Temporarily Down] NYC Property Deeds Q&A with Integrated AI
+NYC Property Deeds Q&A with Integrated AI
 ================================================
 Get natural language answers to questions about actual [New York City property deeds](https://data.cityofnewyork.us/City-Government/ACRIS-Real-Property-Legals/8h5j-fqxa/about_data)!
 
-**Live Demo Link:** [http://34.83.125.145:8000/](http://34.118.192.16:8000/)
+**Live Demo Link:** [http://136.118.66.156:8000](http://136.118.66.156:8000/)
 
 ## Description
 
